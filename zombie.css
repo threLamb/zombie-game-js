@@ -1,0 +1,14 @@
+body{
+    background: rgb(38, 39, 39); 
+}
+
+#canvas { 
+    background: rgb(143, 0, 0); 
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+}
