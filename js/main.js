@@ -52,7 +52,7 @@ class Timer {
 
     isRunning(progress) { //タイマーが実行中かを返し、タイマー進める                
         this.elapsedTime += progress //タイマーを進める  
-        if (this.elapsedTime >= this.waitingTime){//目標時間が経過した場合
+        if (this.elapsedTime >= this.waitingTime) {//目標時間が経過した場合
             this.elapsedTime = this.waitingTime
             return false
         }
@@ -70,7 +70,7 @@ const playerInput = {
     Right: false,
     Down: false,
     Left: false,
-    Enter:false,
+    Enter: false,
     Change: false,
     Grenade: false,
     mouseClicked: false,
@@ -90,7 +90,7 @@ document.addEventListener("keydown", e => {
         playerInput.Change = true
     else if (e.key === "r")
         playerInput.Grenade = true
-    else if(e.key == "Enter")
+    else if (e.key == "Enter")
         playerInput.Enter = true
 })
 document.addEventListener("keyup", e => {
@@ -106,7 +106,7 @@ document.addEventListener("keyup", e => {
         playerInput.Change = false
     else if (e.key === "r")
         playerInput.Grenade = false
-    else if(e.key == "Enter")
+    else if (e.key == "Enter")
         playerInput.Enter = false
 })
 
@@ -129,7 +129,6 @@ class Sprite {
     speed = 0
     angle = 0
     destroyed = false
-    point = 50
     constructor(image) {
         this.position = new Vector2(0, 0)
         this.image = image
@@ -771,16 +770,18 @@ class PointUI {
     }
 }
 
-class GameOverUI {    
+class GameOverUI {
     draw(ctx) {
+        if (!gameOverFlag) return;
+
         ctx.save()
         ctx.fillStyle = "rgb(255, 0, 0)"
         ctx.textAlign = "right"
         ctx.font = "55px serif";
-        ctx.fillText("GAME OVER", (CANVAS_WIDTH + 35*9)/2, CANVAS_HEIGHT/2 - 100);
+        ctx.fillText("GAME OVER", (CANVAS_WIDTH + 35 * 9) / 2, CANVAS_HEIGHT / 2 - 100);
         ctx.fillStyle = "rgb(0, 0, 0)"
         ctx.font = "30px serif";
-        ctx.fillText("Please enter to continue", (CANVAS_WIDTH + 14*24)/2, CANVAS_HEIGHT/2 -50);
+        ctx.fillText("Please enter to continue", (CANVAS_WIDTH + 14 * 24) / 2, CANVAS_HEIGHT / 2 - 50);
         ctx.restore()
     }
 }
@@ -939,7 +940,7 @@ class GameManager {
             landingPosition.y = -landingPosition.y + 2 * maxY
         }
 
-        //制御点の決定
+        //制御点の決定　TODO:ランダムに決定する
         let controllPosition = new Vector2(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2)
 
         enemyList.unshift(new Transporter(firstPosition, controllPosition, landingPosition, spawnList))
@@ -1012,14 +1013,14 @@ function init() {
         Asset.assets.forEach(function (asset) {
             switch (asset.type) {
                 case 'image':
-                    Asset._loadImage(asset, onLoad);
+                    Asset.loadImage(asset, onLoad);
                     break;
             }
         });
     }
 
     // 画像の読み込み
-    Asset._loadImage = function (asset, onLoad) {
+    Asset.loadImage = function (asset, onLoad) {
         let image = new Image();
         image.src = asset.src;
         image.onload = onLoad;
@@ -1030,43 +1031,37 @@ function init() {
         background = new Background()
         gameManager = new GameManager()
 
-        /*
-                let enemy = new Bomber()
-                enemy.position = new Vector2(0, 0)
-                enemyList.push(enemy)
-        */
-
         window.requestAnimationFrame(loop)
     })
 }
 
 init()
 
-function reset(){
+function reset() {
     player = new Player()
     background = new Background()
-    gameManager = new GameManager()        
+    gameManager = new GameManager()
 
     gameOverFlag = false
 
     playerBulletList = []
     enemyList = []
     enemyBulletList = []
-    effectList = []    
+    effectList = []
 
     UI.POINT.point = 0
 }
 
 function update(progress) {
-    if (gameOverFlag){
-        if(playerInput.Enter){
+    if (gameOverFlag) {
+        if (playerInput.Enter) {
             reset()
-        }    
+        }
         return
     }
 
-    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)    
-    
+    ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT)
+
     let p = player.getOffsetPosition()
     let offset = new Vector2(-p.x, -p.y)
 
@@ -1135,17 +1130,15 @@ function update(progress) {
         }
     }
 
-    //UIの更新
-    UI.HP.draw(ctx)
-    UI.POINT.draw(ctx)
-    UI.WEAPON.draw(ctx)
-    UI.GRENADE.draw(ctx)    
-
-    //ゲームオーバーかの確認
+    //ゲームオーバーかの判定
     if (player.hp < 1) {
-        UI.GAMEOVER.draw(ctx)          
         gameOverFlag = true
     }
+
+    //UIの更新
+    Object.keys(UI).forEach(function (key) {
+        this[key].draw(ctx)
+    }, UI)
 }
 
 //ゲームループ
